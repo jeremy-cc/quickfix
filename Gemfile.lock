@@ -1,0 +1,16 @@
+GEM
+  remote: http://geminabox.ccycloud.com:9292/
+  remote: http://rubygems.org/
+  specs:
+    colorize (0.5.6)
+    newfix (0.4.2)
+    rfx_trade_id_generator (0.0.1)
+
+PLATFORMS
+  java
+  ruby
+
+DEPENDENCIES
+  colorize (= 0.5.6)
+  newfix (= 0.4.2)
+  rfx_trade_id_generator (= 0.0.1)
