@@ -1,10 +1,14 @@
 class FixHandler <  Java::Quickfix::MessageCracker
   include  Java::Quickfix::Application
 
-  attr_reader :session_settings, :provider
+  attr_reader :session_settings, :provider, :listener
 
   def initialize(session_settings)
     @session_settings = session_settings
+  end
+
+  def register_listener(listener=nil)
+    @listener = listener
   end
 
   def fromAdmin(message, session_id)
@@ -58,10 +62,17 @@ class FixHandler <  Java::Quickfix::MessageCracker
     case message.getHeader.getString(Fix::Fields::MsgType::FIELD)
       when Fix::Fields::MsgType::EXECUTION_REPORT
         begin
-          Logger.debug "Trying to dispatch to provider"
-          parsed_response = ProviderRegistry.provider_for(session_settings.getString(session_id, "Provider")).handleExecutionReport(message)
+          parsed_response = ProviderRegistry.provider_for(session_settings.getString(session_id, "Provider")).handle(message)
 
-          Logger.info parsed_response.inspect
+          listener.handleExecutionReport(parsed_response) if listener
+        rescue StandardError => e
+          Logger.error e
+        end
+      when Fix::Fields::MsgType::QUOTE
+        begin
+          parsed_response = ProviderRegistry.provider_for(session_settings.getString(session_id, "Provider")).handle(message)
+
+          listener.handleQuote(parsed_response) if listener
         rescue StandardError => e
           Logger.error e
         end

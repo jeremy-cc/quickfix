@@ -14,7 +14,7 @@ require 'lib/java/log4j-1.2.17.jar'
 require 'lib/java/mina-core-2.0.9.jar'
 
 require 'lib/logger'
-require 'lib/cli/cli'
+require 'lib/app/cli'
 require 'lib/fix/fix'
 require 'lib/fix/fix_handler'
 require 'lib/fix/provider_registry'
@@ -26,7 +26,7 @@ $CLASSPATH << File.expand_path('config', File.dirname(__FILE__))
 
 begin
   QuickFix::CLI.parse
-  QuickFix::CLI.run
+  QuickFix::CLI.test
 rescue => e
   raise e if $DEBUG
   STDERR.puts e.message

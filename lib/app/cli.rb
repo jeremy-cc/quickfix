@@ -14,8 +14,32 @@ module QuickFix
       setup_logger
     end
 
+    class MockListener
+      def handleExecutionReport(msg)
+        Logger.warn "Handling Execution Report: #{msg.inspect}"
+      end
+
+      def handleQuote(msg)
+        Logger.warn "Handling Quote: #{msg.inspect}"
+      end
+    end
+
+    def test
+      Logger.info "Connecting"
+      run
+      Logger.info "Testing"
+      @conn.test
+      Logger.info "Shutting down"
+      shutdown
+    end
+
     def run
-      FixConnection.new(@config_file).test
+      @conn = FixConnection.new(@config_file, MockListener.new)
+      @conn.connect
+    end
+
+    def shutdown
+      @conn.shutdown
     end
 
     private

@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), '..', 'fix')
 
 class Barclays
 
-  def requestPrice(sessionSettings, session, pairs)
+  def requestPrice(sessionSettings, session, reference, pairs, amount, settlement_date="SP")
 
     pairs.each do |pair|
       message = Fix::Fix42::QuoteRequest.new
@@ -12,13 +12,13 @@ class Barclays
 
       message.setField(Fix::Fields::OrdType::FIELD, Fix::Fields::OrdType.new(67)) # 'C'
       message.setField(Fix::Fields::SecurityType::FIELD, Fix::Fields::SecurityType.new("FOR"))
-      message.set(Fix::Fields::QuoteReqID.new("TCC-" + Time.now.to_i.to_s))
+      message.set(Fix::Fields::QuoteReqID.new(reference))
 
       message.setField(Fix::Fields::NoRelatedSym::FIELD, Fix::Fields::NoRelatedSym.new(1))
       message.setField(Fix::Fields::Symbol::FIELD, Fix::Fields::Symbol.new(pair))
       message.setField(Fix::Fields::Currency::FIELD, Fix::Fields::Currency.new(pair[4..6]))
-      message.setField(Fix::Fields::OrderQty::FIELD, Fix::Fields::OrderQty.new(10000.0))
-      message.setField(Fix::Fields::FutSettDate::FIELD, Fix::Fields::FutSettDate.new("SP"))
+      message.setField(Fix::Fields::OrderQty::FIELD, Fix::Fields::OrderQty.new(amount))
+      message.setField(Fix::Fields::FutSettDate::FIELD, Fix::Fields::FutSettDate.new(settlement_date))
 
       Logger.debug "SESSION %s: Sending %s" % [session.getSessionID(), message.to_s]
       unless Fix::Session.sendToTarget(message, session.getSessionID())
@@ -51,7 +51,7 @@ class Barclays
     end
   end
 
-  def handleExecutionReport(message)
+  def handle(message)
     begin
       FIX::Message.from_fix(message.to_s).to_hash
     rescue StandardError => e
